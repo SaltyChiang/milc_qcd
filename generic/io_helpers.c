@@ -41,6 +41,9 @@ gauge_file *save_lattice( int flag, const char *filename, const char *stringLFN)
 	case SAVE_PARALLEL:
 	    gf = save_parallel(filename);
 	    break;
+        case SAVE_MPIIO:
+            gf = save_mpiio(filename);
+            break;
 	case SAVE_CHECKPOINT:
 	    gf = save_checkpoint(filename);
 	    break;
@@ -205,6 +208,9 @@ gauge_file *reload_lattice( int flag, const char *filename){
 	case RELOAD_PARALLEL:	/* read binary lattice in parallel */
 	    gf = restore_parallel(filename);
 	    break;
+        case RELOAD_MPIIO:
+            gf = restore_mpiio(filename);
+            break;
 	default:
 	    if(this_node==0)printf("reload_lattice: Bad startflag %d\n",flag);
 	    terminate(1);
