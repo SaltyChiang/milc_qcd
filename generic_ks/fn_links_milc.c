@@ -33,8 +33,10 @@ create_G_special(void){
     printf("%s: no room\n",myname);
     terminate(1);
   }
-
-  memset(m, '\0', sites_on_node*4*sizeof(su3_matrix));
+  size_t i;
+  FORALLFIELDSITES_OMP(i,){
+    memset(m+4*i, '\0', 4*sizeof(su3_matrix));
+  } END_LOOP_OMP
   return m;
 }
 
@@ -402,6 +404,49 @@ add_fn(fn_links_t *fn_A, fn_links_t *fn_B, fn_links_t *fn_C){
 	add_su3_matrix( fatbackA + 4*i + dir, fatbackB + 4*i + dir, fatbackC + 4*i + dir );
       if(lngbackA != NULL && lngbackB != NULL && lngbackC != NULL)
 	add_su3_matrix( lngbackA + 4*i + dir, lngbackB + 4*i + dir, lngbackC + 4*i + dir );
+    }
+  }
+  END_LOOP_OMP;
+}
+
+void axpyz_su3_matrix(Real a, su3_matrix *x, su3_matrix *y, su3_matrix *z) {
+  register int i, j;
+  for(i = 0; i < 3; i++)
+    for(j = 0; j < 3; j++) {
+      z->e[i][j].real = a * x->e[i][j].real + y->e[i][j].real;
+      z->e[i][j].imag = a * x->e[i][j].imag + y->e[i][j].imag;
+    }
+}
+
+void axpyz_fn(Real a, fn_links_t *fn_X, fn_links_t *fn_Y, fn_links_t *fn_Z) {
+
+  char myname[] = "axpyz_fn";
+
+  int i, dir;
+
+  su3_matrix *fatX = get_fatlinks(fn_X);
+  su3_matrix *lngX = get_lnglinks(fn_X);
+  su3_matrix *fatbackX = get_fatbacklinks(fn_X);
+  su3_matrix *lngbackX = get_lngbacklinks(fn_X);
+
+  su3_matrix *fatY = get_fatlinks(fn_Y);
+  su3_matrix *lngY = get_lnglinks(fn_Y);
+  su3_matrix *fatbackY = get_fatbacklinks(fn_Y);
+  su3_matrix *lngbackY = get_lngbacklinks(fn_Y);
+
+  su3_matrix *fatZ = get_fatlinks(fn_Z);
+  su3_matrix *lngZ = get_lnglinks(fn_Z);
+  su3_matrix *fatbackZ = get_fatbacklinks(fn_Z);
+  su3_matrix *lngbackZ = get_lngbacklinks(fn_Z);
+
+  FORALLFIELDSITES_OMP(i,private(dir)) {
+    for(dir = XUP; dir <= TUP; dir++) {
+      axpyz_su3_matrix(a, fatX + 4 * i + dir, fatY + 4 * i + dir, fatZ + 4 * i + dir);
+      axpyz_su3_matrix(a, lngX + 4 * i + dir, lngY + 4 * i + dir, lngZ + 4 * i + dir);
+      if(fatbackX != NULL && fatbackY != NULL && fatbackZ != NULL)
+	axpyz_su3_matrix(a, fatbackX + 4 * i + dir, fatbackY + 4 * i + dir, fatbackZ + 4 * i + dir);
+      if(lngbackX != NULL && lngbackY != NULL && lngbackZ != NULL)
+	axpyz_su3_matrix(a, lngbackX + 4 * i + dir, lngbackY + 4 * i + dir, lngbackZ + 4 * i + dir);
     }
   }
   END_LOOP_OMP;

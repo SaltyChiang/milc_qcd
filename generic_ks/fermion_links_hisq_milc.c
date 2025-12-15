@@ -245,8 +245,9 @@ get_hisq_links_t_fn(hisq_links_t *hl, int i_naik, ferm_links_options_t *options)
       fn->fatback = create_fatlinks();
       fn->lngback = create_lnglinks();
     }
-    scalar_mult_fn(fn_deps, eps_naik[i_naik], fn);
-    add_fn(fn, hl->fn0, fn);
+    // scalar_mult_fn(fn_deps, eps_naik[i_naik], fn);
+    // add_fn(fn, hl->fn0, fn);
+    axpyz_fn(eps_naik[i_naik], fn_deps, hl->fn0, fn);
     fn->preserve = 0;
     fn->eps_naik = eps_naik[i_naik];
   }

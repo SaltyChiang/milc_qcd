@@ -35,5 +35,6 @@ void init_ferm_links(fn_links_t *fn);
 void copy_fn(fn_links_t *fn_src, fn_links_t *fn_dst);
 void scalar_mult_fn(fn_links_t *fnsrc, Real s, fn_links_t *fndst);
 void add_fn(fn_links_t *fnA, fn_links_t *fnB, fn_links_t *fnC);
+void axpyz_fn(Real a, fn_links_t *fn_X, fn_links_t *fn_Y, fn_links_t *fn_Z);
 
 #endif /* _FN_LINKS_H */

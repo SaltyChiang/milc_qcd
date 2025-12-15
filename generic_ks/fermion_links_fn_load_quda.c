@@ -14,6 +14,7 @@
 #include "generic_ks_includes.h"
 #include "../include/info.h"
 #include "../include/generic_quda.h"
+#include "../include/openmp_defs.h"
 
 void  
 load_fatlinks_gpu(info_t *info, su3_matrix *fat, ks_component_paths *p, su3_matrix *links)
@@ -87,7 +88,10 @@ load_hisq_aux_links_gpu(info_t *info, ks_action_paths_hisq *ap,
   }
 
   // load U links (is this really necessary since we have extracted "links" already?)
-  memcpy(aux->U_link, links, 4*sizeof(su3_matrix)*sites_on_node);
+  size_t i;
+  FORALLFIELDSITES_OMP(i,) {
+    memcpy(aux->U_link+4*i, links+4*i, 4*sizeof(su3_matrix));
+  } END_LOOP_OMP
 
   double path_coeff[6];
   path_coeff[0] = ap->p1.act_path_coeff.one_link;

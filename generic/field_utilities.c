@@ -32,7 +32,10 @@ void print_timing(double dtime, const char *str){
 /*--------------------------------------------------------------------*/
 #define make_clear_field(ABBREV, T) \
 void clear_##ABBREV##_field(T *x){ \
-  memset(x,'\0',sites_on_node*sizeof(T)); \
+  size_t i; \
+  FORALLFIELDSITES_OMP(i,) { \
+    memset(x+i, '\0', sizeof(T)); \
+  } END_LOOP_OMP \
 }
 
 #define make_create_field(ABBREV, T) \
@@ -49,7 +52,10 @@ T* create_##ABBREV##_field(void){ \
 
 #define make_copy_field(ABBREV, T) \
 void copy_##ABBREV##_field(T *dst, const T * const src){ \
-  memcpy(dst, src, sites_on_node*sizeof(T)); \
+  size_t i; \
+  FORALLFIELDSITES_OMP(i,) { \
+    memcpy(dst+i, src+i, sizeof(T)); \
+  } END_LOOP_OMP \
 }
 
 #define make_destroy_field(ABBREV, T) \
