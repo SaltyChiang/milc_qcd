@@ -38,10 +38,12 @@ else ifeq ($(strip ${COMPILER}),ibm)
   CC = xlc_r
 else ifeq ($(strip ${COMPILER}),amdclang)
   CC = amdclang
+else ifeq ($(strip ${COMPILER}),nvhpc)
+  CC = nvc
 endif
 
 # Override
-CC = gcc # ( cc89 gcc xlc gcc pgcc cl g++ )
+CC ?= gcc # ( cc89 gcc xlc gcc pgcc cl g++ )
 
 #----------------------------------------------------------------------
 # 2. Compiler optimization level
