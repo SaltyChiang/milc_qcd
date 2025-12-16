@@ -34,7 +34,10 @@ create_G_special(void){
     terminate(1);
   }
 
-  memset(m, '\0', sites_on_node*4*sizeof(su3_matrix));
+  size_t i;
+  FORALLFIELDSITES_OMP(i,){
+    memset(m+4*i, '\0', 4*sizeof(su3_matrix));
+  } END_LOOP_OMP
   return m;
 }
 
