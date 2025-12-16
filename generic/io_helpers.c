@@ -372,6 +372,9 @@ int ask_starting_lattice( FILE *fp, int prompt, int *flag, char *filename ){
   else if(strcmp("reload_parallel",savebuf) == 0 ) {
     *flag = RELOAD_PARALLEL;
   }
+  else if(strcmp("reload_mpiio",savebuf) == 0 ) {
+    *flag = RELOAD_MPIIO;
+  }
   else{
     printf(" is not a valid starting lattice command. INPUT ERROR.\n"); 
     return 1;
@@ -414,6 +417,9 @@ int ask_ending_lattice(FILE *fp, int prompt, int *flag, char *filename ){
   }
   else if(strcmp("save_parallel",savebuf) == 0 ) {
     *flag=SAVE_PARALLEL;
+  }
+  else if(strcmp("save_mpiio",savebuf) == 0 ) {
+    *flag=SAVE_MPIIO;
   }
   else if(strcmp("save_checkpoint",savebuf) == 0 ) {
     *flag=SAVE_CHECKPOINT;
