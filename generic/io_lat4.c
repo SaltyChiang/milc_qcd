@@ -1096,7 +1096,13 @@ static void w_mpiio(gauge_file *gf)
   MPI_File_open(MPI_COMM_WORLD, gf->filename, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
   MPI_Type_commit(&filetype);
   MPI_File_set_view(fh, offset, MPI_BYTE, filetype, "native", MPI_INFO_NULL);
-  MPI_File_write_all(fh, buf, gauge_node_size / sizeof(MPI_COMPLEX8), MPI_COMPLEX8, MPI_STATUS_IGNORE);
+  size_t buf_offset = 0, total_count = gauge_node_size / sizeof(fcomplex);
+  while (buf_offset < total_count) {
+    int count_ = (total_count - buf_offset > (1 << 30)) ? (1 << 30) : (total_count - buf_offset);
+    MPI_File_write_all(fh, &((fcomplex *)buf)[buf_offset], count_, MPI_COMPLEX8, MPI_STATUS_IGNORE);
+    buf_offset += count_;
+  }
+  // MPI_File_write_all(fh, buf, total_count, MPI_COMPLEX8, MPI_STATUS_IGNORE);
   MPI_Type_free(&filetype);
   MPI_File_close(&fh);
 
@@ -1586,7 +1592,13 @@ static void r_mpiio(gauge_file *gf)
   MPI_File_open(MPI_COMM_WORLD, gf->filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
   MPI_Type_commit(&filetype);
   MPI_File_set_view(fh, offset, MPI_BYTE, filetype, "native", MPI_INFO_NULL);
-  MPI_File_read_all(fh, buf, gauge_node_size / sizeof(MPI_COMPLEX8), MPI_COMPLEX8, MPI_STATUS_IGNORE);
+  size_t buf_offset = 0, total_count = gauge_node_size / sizeof(fcomplex);
+  while (buf_offset < total_count) {
+    int count_ = (total_count - buf_offset > (1 << 30)) ? (1 << 30) : (total_count - buf_offset);
+    MPI_File_read_all(fh, &((fcomplex *)buf)[buf_offset], count_, MPI_COMPLEX8, MPI_STATUS_IGNORE);
+    buf_offset += count_;
+  }
+  // MPI_File_read_all(fh, buf, total_count, MPI_COMPLEX8, MPI_STATUS_IGNORE);
   MPI_Type_free(&filetype);
   MPI_File_close(&fh);
 
