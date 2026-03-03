@@ -1654,7 +1654,7 @@ static void r_mpiio(gauge_file *gf)
       printf("Time stamp %s\n", gf->header->time_stamp);
       if (g_seek(gf->fp, checksum_offset, SEEK_SET) < 0) {
         printf("%s: Node 0 g_seek %ld for checksum failed error %d file %s\n",
-               myname, (long)offset, errno, gf->filename);
+               myname, (long)head_size, errno, gf->filename);
         fflush(stdout);
         terminate(1);
       }

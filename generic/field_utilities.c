@@ -95,7 +95,7 @@ T* create_##ABBREV##_array_field(int n){ \
 #define make_copy_array_field(ABBREV, T) \
 void copy_##ABBREV##_array_field(T *dst, T *src, int n){	\
   size_t i; \
-  FORALLSITES_OMP(i,) { \
+  FORALLFIELDSITES_OMP(i,) { \
     memcpy(dst+i*n, src+i*n, sizeof(T)*n); \
   } END_LOOP_OMP \
 }
