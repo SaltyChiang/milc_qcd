@@ -16,8 +16,9 @@
 #define FRESH                            11
 #define RELOAD_ASCII                     12
 #define RELOAD_SERIAL                    13
-#define RELOAD_MULTIDUMP                 18
-#define RELOAD_PARALLEL                  19
+#define RELOAD_MULTIDUMP                 17
+#define RELOAD_PARALLEL                  18
+#define RELOAD_MPIIO                     19
 #define WARM                             20
 #define FORGET                           40
 #define SAVE_ASCII                       41
@@ -44,8 +45,7 @@
 #define SAVE_PARALLEL_SCIDAC_DP          62
 #define SAVE_MULTIFILE_SCIDAC_DP         63
 #define SAVE_PARTFILE_SCIDAC_DP          64
-#define RELOAD_MPIIO                     65
-#define SAVE_MPIIO                       66
+#define SAVE_MPIIO                       65
 
 /* Format for NERSC archive files */
 #define ARCHIVE_3x2   0

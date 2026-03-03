@@ -1049,8 +1049,6 @@ static void w_mpiio(gauge_file *gf)
   const int sizes[7] = {nt, nz, ny, nx, 4, 3, 3};
   const int subsizes[7] = {lt, lz, ly, lx, 4, 3, 3};
   const int starts[7] = {gt * lt, gz * lz, gy * ly, gx * lx, 0, 0, 0};
-  MPI_Datatype filetype;
-  MPI_Type_create_subarray(7, sizes, subsizes, starts, MPI_ORDER_C, MPI_COMPLEX8, &filetype);
 
   /* initialize checksums */
   gf->check.sum29 = 0;
@@ -1091,11 +1089,12 @@ static void w_mpiio(gauge_file *gf)
         }
   g_sync();
 
-  size_t offset = head_size;
   MPI_File fh;
   MPI_File_open(MPI_COMM_WORLD, gf->filename, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+  MPI_Datatype filetype;
+  MPI_Type_create_subarray(7, sizes, subsizes, starts, MPI_ORDER_C, MPI_COMPLEX8, &filetype);
   MPI_Type_commit(&filetype);
-  MPI_File_set_view(fh, offset, MPI_BYTE, filetype, "native", MPI_INFO_NULL);
+  MPI_File_set_view(fh, head_size, MPI_BYTE, filetype, "native", MPI_INFO_NULL);
   size_t buf_offset = 0, total_count = gauge_node_size / sizeof(fcomplex);
   while (buf_offset < total_count) {
     int count_ = (total_count - buf_offset > (1 << 30)) ? (1 << 30) : (total_count - buf_offset);
@@ -1584,14 +1583,13 @@ static void r_mpiio(gauge_file *gf)
   const int sizes[7] = {nt, nz, ny, nx, 4, 3, 3};
   const int subsizes[7] = {lt, lz, ly, lx, 4, 3, 3};
   const int starts[7] = {gt * lt, gz * lz, gy * ly, gx * lx, 0, 0, 0};
-  MPI_Datatype filetype;
-  MPI_Type_create_subarray(7, sizes, subsizes, starts, MPI_ORDER_C, MPI_COMPLEX8, &filetype);
 
-  size_t offset = head_size;
   MPI_File fh;
   MPI_File_open(MPI_COMM_WORLD, gf->filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+  MPI_Datatype filetype;
+  MPI_Type_create_subarray(7, sizes, subsizes, starts, MPI_ORDER_C, MPI_COMPLEX8, &filetype);
   MPI_Type_commit(&filetype);
-  MPI_File_set_view(fh, offset, MPI_BYTE, filetype, "native", MPI_INFO_NULL);
+  MPI_File_set_view(fh, head_size, MPI_BYTE, filetype, "native", MPI_INFO_NULL);
   size_t buf_offset = 0, total_count = gauge_node_size / sizeof(fcomplex);
   while (buf_offset < total_count) {
     int count_ = (total_count - buf_offset > (1 << 30)) ? (1 << 30) : (total_count - buf_offset);

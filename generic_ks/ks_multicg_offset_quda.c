@@ -165,6 +165,8 @@ int ks_multicg_offset_field_gpu(
   inv_args.max_iter = qic[0].max*qic[0].nrestart;
 #if defined(MAX_MIXED)
   if (residual[0] > 3e-5 && min_residual / max_residual > 4e-3) {
+    // 3e-5 ~ 2**-15 (Machine epsilon of QUDA's half precision)
+    // 4e-3 ~ 2**-8 (Refinement will not use too many iterations)
     inv_args.mixed_precision = 2;
   } else {
     inv_args.mixed_precision = 1;

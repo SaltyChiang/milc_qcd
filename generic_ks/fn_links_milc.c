@@ -33,10 +33,8 @@ create_G_special(void){
     printf("%s: no room\n",myname);
     terminate(1);
   }
-  size_t i;
-  FORALLFIELDSITES_OMP(i,){
-    memset(m+4*i, '\0', 4*sizeof(su3_matrix));
-  } END_LOOP_OMP
+
+  clear_m_array_field(m, 4);
   return m;
 }
 
