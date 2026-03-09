@@ -23,6 +23,11 @@ typedef struct {
 			     node is at the origin of the square.
 			     Must be divisors of the node_geometry. */
 #endif
+#ifdef FIX_SHARED_NODE_GEOM
+  int shared_node_geometry[4]; /* Specifies fixed "nsquares" for shared nodes
+                                  in each coordinate direction.  Must be divisors of
+                                  the node_geometry. */
+#endif
 #endif
   uint32_t iseed;	          /* for random numbers */
   Real beta;              /* gauge coupling */

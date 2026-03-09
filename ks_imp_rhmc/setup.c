@@ -205,6 +205,10 @@ initial_set(void)
     IF_OK status += get_vi(stdin, prompt, "ionode_geometry", 
 			   param.ionode_geometry, 4);
 #endif
+#ifdef FIX_SHARED_NODE_GEOM
+    IF_OK status += get_vi(stdin, prompt, "shared_node_geometry", 
+                           param.shared_node_geometry, 4);
+#endif
 #endif
     {
       int iseed;
@@ -258,6 +262,10 @@ initial_set(void)
 #ifdef FIX_IONODE_GEOM
   for(i = 0; i < 4; i++)
     ionode_geometry[i] = param.ionode_geometry[i];
+#endif
+#ifdef FIX_SHARED_NODE_GEOM
+  for(i = 0; i < 4; i++)
+    shared_node_geometry[i] = param.shared_node_geometry[i];
 #endif
 #endif
   iseed     = param.iseed;

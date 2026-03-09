@@ -423,6 +423,73 @@ static void set_topology(){
 
 }
   
+#include <mpi.h>
+
+static void set_shared()
+{
+  MPI_Comm shared_comm;
+  MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &shared_comm);
+  int shared_size, shared_rank, shared_size_max, shared_size_min;
+  MPI_Comm_size(shared_comm, &shared_size);
+  MPI_Comm_rank(shared_comm, &shared_rank);
+  MPI_Allreduce(&shared_size, &shared_size_max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&shared_size, &shared_size_min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+  if (shared_size_max != shared_size_min) {
+    if (mynode() == 0)
+      printf("Shared communicator sizes are not consistent across ranks\n");
+    terminate(1);
+  }
+  MPI_Comm leader_comm;
+  MPI_Comm_split(MPI_COMM_WORLD, shared_rank == 0 ? 0 : MPI_UNDEFINED, mynode(), &leader_comm);
+  int leader_rank = -1;
+  if (shared_rank == 0) {
+    MPI_Comm_rank(leader_comm, &leader_rank);
+    MPI_Comm_free(&leader_comm);
+  }
+  MPI_Bcast(&leader_rank, 1, MPI_INT, 0, shared_comm);
+  MPI_Comm_free(&shared_comm);
+
+  int cur_shared_size = 1;
+  int shared_dims[4];
+  int shared_coordinates[4];
+  int node_dims[4];
+  int node_coordinates[4];
+#ifdef FIX_SHARED_NODE_GEOM
+  for (int mu = 0; mu < 4; mu++) {
+    shared_dims[mu] = shared_node_geometry[mu];
+    cur_shared_size *= shared_dims[mu];
+  }
+  if (cur_shared_size != shared_size) {
+    if (mynode() == 0)
+      printf("Shared node geometry does not match shared communicator size\n");
+    terminate(1);
+  }
+#else
+  for (int mu = 0; mu < 4; mu++) { shared_dims[mu] = 1; }
+  int j = 0;
+  while (cur_shared_size < shared_size) {
+    int k = MAXPRIMES - 1;
+    while (k >= 0 && shared_size / cur_shared_size % prime[k] != 0) { k -= 1; }
+    if (k == -1) {
+      if (mynode() == 0)
+        printf("Can't factor shared communicator size %d with primes up to %d\n", shared_size, prime[MAXPRIMES - 1]);
+      terminate(1);
+    }
+    cur_shared_size *= prime[k];
+    while (nsquares[j] / shared_dims[j] % prime[k] != 0) { j = (j + 1) % 4; }
+    shared_dims[j] *= prime[k];
+  }
+#endif
+
+  for (int mu = 0; mu < 4; mu++) { node_dims[mu] = nsquares[mu] / shared_dims[mu]; }
+  lex_coords(node_coordinates, 4, node_dims, leader_rank);
+  lex_coords(shared_coordinates, 4, shared_dims, shared_rank);
+  for (int mu = 0; mu < 4; mu++) { machine_coordinates[mu] = node_coordinates[mu] * node_dims[mu] + shared_coordinates[mu]; }
+  size_t new_rank = lex_rank(machine_coordinates, 4, nsquares);
+  reset_machine_rank(new_rank);
+  set_topology();
+}
+
 /*------------------------------------------------------------------*/
 /* Initialization entry point */
 
@@ -431,6 +498,8 @@ void setup_layout(){
   /* Set topology: nsquares, squaresize */
 
   set_topology();
+
+  set_shared();
 
 #ifdef HAVE_GRID
 
